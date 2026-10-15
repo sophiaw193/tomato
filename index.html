@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>What Kind of Tomato Are You?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --brick: #B7402D;
+    --brick-rgb: 183, 64, 45;
+    --brick-dark: #8F3222;
+    --sage: #489F39;
+    --sage-rgb: 72, 159, 57;
+    --sage-dark: #397A2C;
+    --butter: #FFE57E;
+    --cream: #FBF3E3;
+    --cream-card: #FFFDF8;
+    --ink: #60340A;
+    --shadow: rgba(96, 52, 10, 0.15);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 560px;
+    position: relative;
+  }
+
+  section {
+    display: none;
+  }
+
+  section.active {
+    display: block;
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--cream-card);
+    border-radius: 28px;
+    box-shadow: 0 10px 30px var(--shadow);
+    padding: 40px 32px;
+    text-align: center;
+  }
+
+  h1, h2, .quiz-question {
+    font-family: 'Grandstander', sans-serif;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--brick);
+    margin: 0 0 8px;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 24px;
+  }
+
+  p.subtitle {
+    color: var(--sage-dark);
+    font-weight: 500;
+    margin-top: 0;
+  }
+
+  .tomato-graphic {
+    margin: 8px auto 20px;
+    width: 140px;
+    height: 140px;
+  }
+
+  .tomato-graphic svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Real tomato art is wider than tall, so let it keep its own proportions */
+  .tomato-graphic.is-art {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+
+  .tomato-graphic img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brick);
+    border: none;
+    border-radius: 999px;
+    padding: 14px 32px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(var(--brick-rgb), 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(var(--brick-rgb), 0.45);
+  }
+
+  .btn:disabled {
+    background: #D9CFC0;
+    color: #A99E8C;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--brick);
+    border: 2px solid var(--brick);
+    box-shadow: none;
+  }
+
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-icon-svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .btn-green {
+    background: var(--sage);
+    box-shadow: 0 6px 16px rgba(var(--sage-rgb), 0.35);
+  }
+
+  .btn-green:hover:not(:disabled) {
+    box-shadow: 0 8px 20px rgba(var(--sage-rgb), 0.45);
+  }
+
+  /* Progress bar */
+  .progress-bar-track {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: #E8DCC6;
+    z-index: 10;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--sage), var(--butter));
+    border-radius: 0 6px 6px 0;
+    transition: width 0.35s ease;
+  }
+
+  /* Quiz options */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .option {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: left;
+    color: var(--ink);
+    background: #FFFFFF;
+    border: 2px solid #E8DCC6;
+    border-radius: 16px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .option:hover {
+    border-color: var(--sage);
+    background: #FAF6EC;
+  }
+
+  .option.selected {
+    border-color: var(--brick);
+    background: rgba(var(--brick-rgb), 0.1);
+    color: var(--brick-dark);
+    font-weight: 600;
+  }
+
+  .quiz-question {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 8px 0 24px;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .button-row .btn {
+    flex: 0 1 auto;
+  }
+
+  .top-spacer {
+    height: 24px;
+  }
+
+  /* Result page */
+  .result-card-capture {
+    padding: 22px 20px 4px;
+  }
+
+  .result-blurb {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0 0 20px;
+  }
+
+  .pros-cons-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    margin: 0 0 4px;
+  }
+
+  .pros-cons-line {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .pros-cons-label {
+    font-family: 'Grandstander', sans-serif;
+    font-weight: 700;
+  }
+
+  .pros-label {
+    color: var(--sage-dark);
+  }
+
+  .cons-label {
+    color: var(--brick-dark);
+  }
+
+  .result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  /* Save fallback overlay */
+  .save-fallback-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(96, 52, 10, 0.55);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 100;
+  }
+
+  .save-fallback-overlay.active {
+    display: flex;
+  }
+
+  .save-fallback-content {
+    background: var(--cream-card);
+    border-radius: 24px;
+    padding: 24px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 12px 40px var(--shadow);
+  }
+
+  .save-fallback-content img {
+    width: 100%;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #E8DCC6;
+    display: block;
+  }
+
+  .save-fallback-content p {
+    font-size: 0.9rem;
+    color: var(--ink);
+    margin: 0 0 18px;
+  }
+
+  .save-fallback-content .btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 14px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .save-fallback-content .btn.btn-icon {
+    display: flex;
+  }
+
+  .save-fallback-content .btn:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Landing page: centered on screen (the other views stay top-anchored) */
+  body[data-view="view-landing"] {
+    align-items: center;
+  }
+
+  #view-landing .tomato-graphic.is-art {
+    max-width: 192px;
+  }
+
+  /* Title stays on one line: 14.44em is its measured width in Grandstander
+     bold, so size it from the card's available width. */
+  #view-landing h1 {
+    font-size: min(1.8rem, calc((100vw - 120px) / 14.6));
+    white-space: nowrap;
+    margin: 0 0 28px;
+  }
+
+  /* Sticker flow */
+  .sticker-camera-graphic-wrap {
+    position: relative;
+    width: 280px;
+    max-width: 100%;
+    margin: 32px auto;
+  }
+
+  .sticker-camera-graphic {
+    margin: 0 auto;
+  }
+
+  .camera-instructions {
+    margin: 8px 0 0;
+    font-family: 'Grandstander', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--brick);
+  }
+
+  .camera-trigger-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--cream-card);
+    border: 3px solid var(--brick);
+    color: var(--brick);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: 0 6px 16px var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .camera-trigger-btn:hover {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 8px 20px var(--shadow);
+  }
+
+  .camera-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .crop-instructions {
+    margin: 4px 0 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  .crop-canvas-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  #cropCanvas {
+    max-width: 100%;
+    height: auto;
+    touch-action: none;
+    border-radius: 20px;
+    background: #E8DCC6;
+  }
+
+  .zoom-slider {
+    display: block;
+    width: 100%;
+    margin: 0 0 24px;
+    accent-color: var(--sage);
+  }
+
+  .sticker-final-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  #stickerFinalCanvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .joke-card {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    background: rgba(255, 229, 126, 0.3);
+    border-radius: 18px;
+    text-align: center;
+  }
+
+  .joke-label {
+    margin: 0 0 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+  }
+
+  .joke-setup {
+    margin: 0 0 6px;
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  .joke-answer {
+    margin: 0;
+    font-family: 'Grandstander', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--brick);
+  }
+
+  /* Compact layout on phones so the result page fits one screen without scrolling */
+  @media (max-width: 480px) {
+    body {
+      padding: 48px 16px 16px;
+    }
+
+    .card {
+      padding: 14px 14px 18px;
+    }
+
+    .result-card-capture {
+      padding: 14px 14px 2px;
+    }
+
+    #view-result .tomato-graphic {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 14px;
+    }
+
+    #view-result .tomato-graphic.is-art {
+      width: 210px;
+      height: auto;
+      margin: 0 auto 12px;
+    }
+
+    #view-result h1 {
+      font-size: 1.5rem;
+      margin: 0 0 8px;
+    }
+
+    .result-blurb {
+      font-size: 0.88rem;
+      line-height: 1.4;
+      margin: 0 0 16px;
+    }
+
+    .pros-cons-stack {
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .pros-cons-line {
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .result-actions {
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .result-actions .btn {
+      padding: 11px 24px;
+      font-size: 0.92rem;
+    }
+
+    .sticker-camera-graphic-wrap {
+      width: 250px;
+      margin: 24px auto;
+    }
+
+    .camera-trigger-btn {
+      width: 56px;
+      height: 56px;
+    }
+
+    .camera-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    #view-landing h1 {
+      font-size: min(1.8rem, calc((100vw - 66px) / 14.6));
+    }
+
+    body[data-view="view-landing"] {
+      padding: 16px;
+    }
+  }
+</style>
+</head>
+<body data-view="view-landing">
+
+<div class="progress-bar-track">
+  <div class="progress-bar-fill" id="progressBarFill"></div>
+</div>
+
+<div class="app">
+
+  <!-- LANDING PAGE -->
+  <section id="view-landing" class="active">
+    <div class="card">
+      <div class="tomato-graphic" id="landingTomatoGraphic"></div>
+      <h1>What kind of tomato are you?</h1>
+      <button class="btn btn-green btn-icon" id="startQuizBtn">
+        <span class="btn-label">Take the quiz</span>
+        <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- QUIZ VIEW -->
+  <section id="view-quiz">
+    <div class="card">
+      <div class="quiz-question" id="quizQuestionText"></div>
+      <div class="options" id="quizOptions"></div>
+      <div class="button-row">
+        <button class="btn btn-outline" id="backBtn">Back</button>
+        <button class="btn" id="nextBtn" disabled>Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT VIEW -->
+  <section id="view-result">
+    <div class="card">
+      <div id="resultCardCapture" class="result-card-capture">
+        <div class="tomato-graphic" id="resultTomatoGraphic"></div>
+        <h1 id="resultTomatoName"></h1>
+        <p class="result-blurb" id="resultBlurb"></p>
+        <div class="pros-cons-stack">
+          <p class="pros-cons-line"><span class="pros-cons-label pros-label">Pros:</span> <span id="resultProsText"></span></p>
+          <p class="pros-cons-line"><span class="pros-cons-label cons-label">Cons:</span> <span id="resultConsText"></span></p>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-green btn-block btn-icon" id="stickerBtn">
+          <span class="btn-label">Turn Me Into a Tomato</span>
+          <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        </button>
+        <button class="btn btn-outline btn-block btn-icon" id="saveBtn">
+          <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+          <span class="btn-label">Save my result</span>
+        </button>
+        <button class="btn btn-outline btn-block btn-icon" id="restartBtn">
+          <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <span class="btn-label">Retake the Quiz</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STICKER STEP 1: CAMERA TRIGGER -->
+  <section id="view-sticker-camera">
+    <div class="card">
+      <p class="camera-instructions">Take a photo!</p>
+      <div class="sticker-camera-graphic-wrap">
+        <div class="tomato-graphic sticker-camera-graphic" id="stickerCameraGraphic"></div>
+        <button class="camera-trigger-btn" id="cameraTriggerBtn" type="button" aria-label="Take a photo">
+          <svg class="camera-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 8a2 2 0 0 1 2-2h1.2l.9-1.5A2 2 0 0 1 9.8 3.5h4.4a2 2 0 0 1 1.7 1L17 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="12" cy="12.5" r="3.4" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+        </button>
+      </div>
+      <input type="file" accept="image/*" capture="user" id="cameraFileInput" class="visually-hidden" />
+    </div>
+  </section>
+
+  <!-- STICKER STEP 2: REFRAME / CROP -->
+  <section id="view-sticker-crop">
+    <div class="card">
+      <p class="crop-instructions">Make your face fill the whole oval, with no background showing.</p>
+      <div class="crop-canvas-wrap">
+        <canvas id="cropCanvas" width="300" height="300"></canvas>
+      </div>
+      <input type="range" id="zoomSlider" class="zoom-slider" min="1" max="3" step="0.01" value="1" aria-label="Zoom" />
+      <div class="button-row">
+        <button class="btn btn-outline" id="retakeBtn">Retake</button>
+        <button class="btn" id="confirmCropBtn">Confirm</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STICKER STEP 3: FINAL COMPOSITE -->
+  <section id="view-sticker-final">
+    <div class="card">
+      <div class="sticker-final-wrap">
+        <canvas id="stickerFinalCanvas" width="420" height="420"></canvas>
+      </div>
+      <div class="joke-card">
+        <p class="joke-label">Tomato joke</p>
+        <p class="joke-setup" id="jokeSetup"></p>
+        <p class="joke-answer" id="jokeAnswer"></p>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-green btn-block btn-icon" id="stickerShareBtn">
+          <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+          <span class="btn-label">Share</span>
+        </button>
+        <button class="btn btn-outline btn-block btn-icon" id="stickerBackBtn">
+          <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+          <span class="btn-label">Back to Result</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Save fallback overlay (shown when Web Share API with files isn't supported) -->
+<div class="save-fallback-overlay" id="saveFallbackOverlay">
+  <div class="save-fallback-content">
+    <img id="saveFallbackImage" alt="Your tomato result card" />
+    <p>Press and hold the image to save it to Photos, or tap Share.</p>
+    <button class="btn btn-green btn-icon" id="savePreviewShareBtn">
+      <svg class="btn-icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+      <span class="btn-label">Share</span>
+    </button>
+    <button class="btn btn-outline" id="saveFallbackClose">Close</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ---------------------------------------------------------------
+  // TOMATO CONFIG
+  // image: path to the tomato art (transparent background). If null, a
+  //        placeholder SVG built from `color` is drawn instead.
+  // faces: where the user's face goes on the art, one entry per tomato in the
+  //        picture. x/y are the face center (0-1 of width/height), size is the
+  //        diameter (fraction of image width), rotation (optional) tilts the
+  //        face in degrees (negative = counter-clockwise). The first entry is
+  //        the "main" tomato, where the camera button sits.
+  // color: fallback tint if the art's color can't be sampled.
+  // ---------------------------------------------------------------
+  var DEFAULT_FACES = [{ x: 0.5, y: 0.58, size: 0.6 }];
+  var HOME_IMAGE = "images/home-tomato.webp";
+
+  var TOMATO_TYPES = {
+    cherry: {
+      name: "Cherry Tomato",
+      article: "a",
+      color: "#E8443A",
+      image: "images/cherry.webp",
+      faces: [
+        { x: 0.73, y: 0.66, size: 0.38 },
+        { x: 0.215, y: 0.655, size: 0.34 }
+      ],
+      blurb: "You’re poppable, spontaneous, have 15 plans a week, and 40 close friends. The life of the party. If you’re having fun, the whole room is. Running on 4 hours of sleep and vibes.",
+      pros: ["Fun", "Spontaneous", "Makes friends easily"],
+      cons: ["Always late", "Can’t commit to plans months out"]
+    },
+    beefsteak: {
+      name: "Beefsteak Tomato",
+      article: "a",
+      color: "#D93A22",
+      image: "images/beefsteak.webp",
+      faces: [{ x: 0.5, y: 0.67, size: 0.45 }],
+      blurb: "You’re grounded, dependable, and loyal. You’re the one who holds it all together, and always has a plan. Everyone counts on you to make the reservation 1 month out.",
+      pros: ["Reliable", "Put-together", "People trust you to handle things"],
+      cons: ["Rigid", "Dramatic when the plan gets disrupted", "Likes things done a certain way (their way)"]
+    },
+    sungold: {
+      name: "Sungold Tomato",
+      article: "a",
+      color: "#F5A91C",
+      image: "images/sungold.webp",
+      faces: [
+        { x: 0.735, y: 0.71, size: 0.35 },
+        { x: 0.405, y: 0.52, size: 0.23, rotation: -75 }
+      ],
+      blurb: "You’re sweet, golden, and laid-back. You light up the room wherever you go, and people feel at ease around you. Can hold a conversation with anyone.",
+      pros: ["Likable", "Easygoing", "Calm under pressure"],
+      cons: ["Can’t make a decision", "Scared of conflict"]
+    },
+    heirloom: {
+      name: "Heirloom Tomato",
+      article: "an",
+      color: "#E2603A",
+      image: "images/heirloom.webp",
+      faces: [{ x: 0.5, y: 0.6, size: 0.4 }],
+      blurb: "You’re funky, layered, and doing your own thing. You definitely had an emo phase growing up. Somehow always on a random side quest.",
+      pros: ["Original", "Confident", "Doesn’t follow trends"],
+      cons: ["Bad texter", "Hard to reach", "Takes a while to open up"]
+    }
+  };
+
+  function buildTomatoSvgMarkup(tomato, size) {
+    size = size || 140;
+    return ''
+      + '<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '">'
+      + '  <ellipse cx="70" cy="80" rx="52" ry="46" fill="' + tomato.color + '" />'
+      + '  <path d="M70 34 C 60 20, 45 18, 38 28 C 48 24, 58 28, 62 36 Z" fill="#397A2C" />'
+      + '  <path d="M70 34 C 80 20, 95 18, 102 28 C 92 24, 82 28, 78 36 Z" fill="#489F39" />'
+      + '  <ellipse cx="70" cy="30" rx="10" ry="8" fill="#397A2C" />'
+      + '  <ellipse cx="50" cy="65" rx="12" ry="8" fill="rgba(255,255,255,0.25)" />'
+      + '</svg>';
+  }
+
+  function renderTomatoGraphic(container, tomatoKey) {
+    var tomato = TOMATO_TYPES[tomatoKey] || TOMATO_TYPES.cherry;
+    container.classList.toggle("is-art", !!tomato.image);
+    if (tomato.image) {
+      container.innerHTML = '<img src="' + tomato.image + '" alt="' + tomato.name + '" />';
+      return;
+    }
+    container.innerHTML = buildTomatoSvgMarkup(tomato, 140);
+  }
+
+  // Loads the tomato graphic as an <img> (rasterized at `size`px) so it can be
+  // drawn onto a <canvas> for compositing — used by the sticker flow.
+  function loadTomatoImage(tomatoKey, size) {
+    var tomato = TOMATO_TYPES[tomatoKey] || TOMATO_TYPES.cherry;
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = reject;
+      if (tomato.image) {
+        img.src = tomato.image;
+      } else {
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(buildTomatoSvgMarkup(tomato, size));
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // TOMATO JOKES
+  // One random joke is shown on the sticker result page each time.
+  // ---------------------------------------------------------------
+  var JOKES = [
+    { setup: "Why was the little tomato always last in the race?", answer: "It just couldn't ketchup." },
+    { setup: "How do you fix a cracked tomato?", answer: "With tomato paste." },
+    { setup: "Why did the tomato go to the library?", answer: "It wanted to be well-red." },
+    { setup: "What dance do tomatoes do at parties?", answer: "The salsa." },
+    { setup: "Why did the tomato get kicked out of the party?", answer: "It was too saucy." },
+    { setup: "Why did the tomato cross the road?", answer: "To ketchup with its friends." },
+    { setup: "What do tomatoes and potatoes have in common?", answer: "Toes!" },
+    { setup: "Where does the tomato and pasta go to dance?", answer: "At the Meat Ball." }
+  ];
+  var lastJokeIndex = -1;
+
+  function showRandomJoke() {
+    var index;
+    do {
+      index = Math.floor(Math.random() * JOKES.length);
+    } while (JOKES.length > 1 && index === lastJokeIndex);
+    lastJokeIndex = index;
+    document.getElementById("jokeSetup").textContent = JOKES[index].setup;
+    document.getElementById("jokeAnswer").textContent = JOKES[index].answer;
+  }
+
+  // ---------------------------------------------------------------
+  // QUIZ DATA
+  // Each answer's `tomato` field maps to a key in TOMATO_TYPES
+  // ---------------------------------------------------------------
+  var QUESTIONS = [
+    {
+      question: "Favorite date night activity?",
+      answers: [
+        { text: "Dinner that turns into karaoke with 8 of our friends", tomato: "cherry" },
+        { text: "Rooftop drinks at sunset", tomato: "sungold" },
+        { text: "Opening night at a buzzy new restaurant", tomato: "beefsteak" },
+        { text: "A jazz show, then a speakeasy", tomato: "heirloom" }
+      ]
+    },
+    {
+      question: "Go-to late night snack?",
+      answers: [
+        { text: "Buldak ramen", tomato: "cherry" },
+        { text: "Froyo", tomato: "sungold" },
+        { text: "Plain crackers", tomato: "beefsteak" },
+        { text: "Pickles straight from the jar", tomato: "heirloom" }
+      ]
+    },
+    {
+      question: "You're at an event and you can't find the only person you know. What do you do?",
+      answers: [
+        { text: "Irish exit", tomato: "heirloom" },
+        { text: "Chat up a friendly stranger", tomato: "cherry" },
+        { text: "Find the snacks", tomato: "sungold" },
+        { text: "Call them 5 times", tomato: "beefsteak" }
+      ]
+    },
+    {
+      question: "How do you plan a trip?",
+      answers: [
+        { text: "Flights booked last week, itinerary is “we’ll figure it out”", tomato: "cherry" },
+        { text: "Hour-by-hour itinerary, booked with CC points", tomato: "beefsteak" },
+        { text: "Somewhere warm and easy, the plan is to lay", tomato: "sungold" },
+        { text: "Stay at a hostel and ask the locals what to do", tomato: "heirloom" }
+      ]
+    },
+    {
+      question: "Your go-to drink order?",
+      answers: [
+        { text: "Tequila shot", tomato: "cherry" },
+        { text: "Dirty martini, extra dirty", tomato: "beefsteak" },
+        { text: "Something fruity, fizzy, and sweet", tomato: "sungold" },
+        { text: "A funky natural wine", tomato: "heirloom" }
+      ]
+    }
+  ];
+
+  // ---------------------------------------------------------------
+  // STATE
+  // ---------------------------------------------------------------
+  var state = {
+    currentQuestionIndex: 0,
+    answers: [], // answers[i] = selected answer index for QUESTIONS[i], or null if unanswered
+    answerOrder: [], // answerOrder[i] = the order QUESTIONS[i]'s answers are shown in (original indexes)
+    resultTomatoKey: null, // the winning tomato from the quiz, e.g. "cherry"
+    stickerPhotoImage: null, // captured photo as an HTMLImageElement
+    stickerBaseScale: 1, // smallest scale at which the photo fully covers the crop oval
+    stickerTransform: { offsetX: 0, offsetY: 0, scale: 1 }, // pan/zoom of the photo within the crop oval
+    stickerPhotoCanvas: null // oval-cropped photo, ready to composite onto the tomato
+  };
+
+  var CROP_CANVAS_SIZE = 300;
+  // The crop viewport is an oval, narrower than tall, so a head fits without
+  // zooming in far enough to cut off the forehead and chin.
+  var CROP_RX = 114;
+  var CROP_RY = 130;
+  var OVAL_ASPECT = CROP_RX / CROP_RY;
+
+  // ---------------------------------------------------------------
+  // VIEW SWITCHING
+  // ---------------------------------------------------------------
+  function showView(viewId) {
+    var sections = document.querySelectorAll("section");
+    for (var i = 0; i < sections.length; i++) {
+      sections[i].classList.toggle("active", sections[i].id === viewId);
+    }
+    document.body.setAttribute("data-view", viewId);
+  }
+
+  // ---------------------------------------------------------------
+  // PROGRESS BAR
+  // ---------------------------------------------------------------
+  function updateProgressBar() {
+    var fill = document.getElementById("progressBarFill");
+    var progress = ((state.currentQuestionIndex) / QUESTIONS.length) * 100;
+    fill.style.width = progress + "%";
+  }
+
+  // ---------------------------------------------------------------
+  // QUIZ RENDERING
+  // ---------------------------------------------------------------
+  // Answers are shown in a random order for each person (fixed for the whole
+  // run, so going Back shows the same order), so the pattern can't be guessed.
+  function shuffledOrder(length) {
+    var order = [];
+    for (var i = 0; i < length; i++) order.push(i);
+    for (var j = order.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var tmp = order[j]; order[j] = order[k]; order[k] = tmp;
+    }
+    return order;
+  }
+
+  function newAnswerOrders() {
+    return QUESTIONS.map(function (q) { return shuffledOrder(q.answers.length); });
+  }
+
+  function renderQuestion() {
+    var q = QUESTIONS[state.currentQuestionIndex];
+    var selectedIndex = state.answers[state.currentQuestionIndex];
+    var isFirstQuestion = state.currentQuestionIndex === 0;
+
+    document.getElementById("quizQuestionText").textContent = q.question;
+
+    var optionsContainer = document.getElementById("quizOptions");
+    optionsContainer.innerHTML = "";
+
+    state.answerOrder[state.currentQuestionIndex].forEach(function (index) {
+      var answer = q.answers[index];
+      var btn = document.createElement("button");
+      btn.className = "option";
+      btn.dataset.answerIndex = index;
+      if (index === selectedIndex) {
+        btn.classList.add("selected");
+      }
+      btn.type = "button";
+      btn.textContent = answer.text;
+      btn.addEventListener("click", function () {
+        selectAnswer(index);
+      });
+      optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById("nextBtn").disabled = (selectedIndex === undefined || selectedIndex === null);
+    document.getElementById("backBtn").style.visibility = isFirstQuestion ? "hidden" : "visible";
+    updateProgressBar();
+  }
+
+  function selectAnswer(index) {
+    state.answers[state.currentQuestionIndex] = index;
+    var options = document.querySelectorAll("#quizOptions .option");
+    options.forEach(function (opt) {
+      opt.classList.toggle("selected", Number(opt.dataset.answerIndex) === index);
+    });
+    document.getElementById("nextBtn").disabled = false;
+  }
+
+  function handleNext() {
+    if (state.answers[state.currentQuestionIndex] === null || state.answers[state.currentQuestionIndex] === undefined) return;
+
+    state.currentQuestionIndex += 1;
+
+    if (state.currentQuestionIndex < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
+  function handleBack() {
+    if (state.currentQuestionIndex === 0) return;
+    state.currentQuestionIndex -= 1;
+    renderQuestion();
+  }
+
+  function finishQuiz() {
+    var fill = document.getElementById("progressBarFill");
+    fill.style.width = "100%";
+
+    var result = calculateResult();
+    console.log("Quiz result:", TOMATO_TYPES[result].name, "(" + result + ")");
+    console.log("Final scores:", calculateScores());
+
+    state.resultTomatoKey = result;
+    renderResult(result);
+    showView("view-result");
+  }
+
+  // ---------------------------------------------------------------
+  // RESULT RENDERING
+  // ---------------------------------------------------------------
+  function renderResult(tomatoKey) {
+    var tomato = TOMATO_TYPES[tomatoKey];
+
+    renderTomatoGraphic(document.getElementById("resultTomatoGraphic"), tomatoKey);
+    document.getElementById("resultTomatoName").textContent = tomato.name;
+    document.getElementById("resultBlurb").textContent = tomato.blurb;
+    document.getElementById("resultProsText").textContent = formatCommaList(tomato.pros);
+    document.getElementById("resultConsText").textContent = formatCommaList(tomato.cons);
+  }
+
+  function formatCommaList(items) {
+    return items.map(function (item, index) {
+      return index === 0 ? item : item.charAt(0).toLowerCase() + item.slice(1);
+    }).join(", ");
+  }
+
+  // ---------------------------------------------------------------
+  // SAVE PREVIEW
+  // Tapping Save/Share shows the finished image in a modal first, so the
+  // person sees exactly what they're getting. From there they can press and
+  // hold the image to save it to Photos, or tap Share for the native sheet.
+  // (iOS draws the share sheet's own header, and for files shared from a web
+  // page it often shows only a generic icon, so the real preview lives here.)
+  // Shared by the result page Save button and the sticker Share button.
+  // ---------------------------------------------------------------
+  var pendingShare = null; // { filename, title, text, file }
+
+  // Once the quiz is hosted, shared messages end with a link to it. Skipped on
+  // localhost and local-network addresses, where the link would be useless to
+  // anyone else. Set INCLUDE_QUIZ_LINK to false to never add it.
+  var INCLUDE_QUIZ_LINK = true;
+
+  function getQuizLink() {
+    if (!INCLUDE_QUIZ_LINK) return "";
+    var host = location.hostname;
+    var isPrivate = !host || host === "localhost" || /^127\./.test(host) || /^10\./.test(host) ||
+      /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host) || /\.local$/.test(host);
+    var isWeb = location.protocol === "https:" || location.protocol === "http:";
+    if (isPrivate || !isWeb) return "";
+    return location.origin + location.pathname.replace(/index\.html$/, "");
+  }
+
+  function withQuizLink(text) {
+    var link = getQuizLink();
+    return link ? text + "\n" + link : text;
+  }
+
+  function showSavePreview(canvas, shareInfo) {
+    document.getElementById("saveFallbackImage").src = canvas.toDataURL("image/png");
+
+    var shareBtn = document.getElementById("savePreviewShareBtn");
+    var canShare = !!(shareInfo && navigator.share && navigator.canShare);
+    pendingShare = canShare ? { title: shareInfo.title, text: shareInfo.text, file: null } : null;
+    shareBtn.style.display = canShare ? "" : "none";
+
+    if (canShare) {
+      // Build the file now so the Share tap can open the sheet immediately;
+      // until it's ready the button says so instead of silently doing nothing
+      var current = pendingShare;
+      var label = shareBtn.querySelector(".btn-label");
+      shareBtn.disabled = true;
+      label.textContent = "Preparing…";
+      canvas.toBlob(function (blob) {
+        if (pendingShare !== current) return; // a newer preview replaced this one
+        if (blob) {
+          current.file = new File([blob], shareInfo.filename, { type: "image/png" });
+          shareBtn.disabled = false;
+          label.textContent = "Share";
+        } else {
+          shareBtn.style.display = "none"; // can't build the file: just the preview
+        }
+      }, "image/png");
+    }
+
+    document.getElementById("saveFallbackOverlay").classList.add("active");
+  }
+
+  function hideSavePreview() {
+    document.getElementById("saveFallbackOverlay").classList.remove("active");
+  }
+
+  function handlePreviewShare() {
+    var share = pendingShare;
+    if (!share || !share.file || !navigator.canShare || !navigator.canShare({ files: [share.file] })) return;
+    navigator.share({
+      files: [share.file],
+      title: share.title,
+      text: share.text
+    }).catch(function () {
+      // Cancelled or unavailable: the preview stays open, nothing else to do
+    });
+  }
+
+  function handleSave() {
+    if (typeof html2canvas === "undefined") {
+      alert("Saving isn't available right now — check your connection and try again.");
+      return;
+    }
+
+    var saveBtn = document.getElementById("saveBtn");
+    var captureTarget = document.getElementById("resultCardCapture");
+    saveBtn.disabled = true;
+    var label = saveBtn.querySelector(".btn-label");
+    var originalLabel = label.textContent;
+    label.textContent = "Preparing…";
+
+    html2canvas(captureTarget, {
+      backgroundColor: "#FFFDF8",
+      scale: 2
+    }).then(function (canvas) {
+      saveBtn.disabled = false;
+      label.textContent = originalLabel;
+      showSavePreview(canvas, {
+        filename: "my-tomato-result.png",
+        title: "My Tomato Type",
+        text: withQuizLink(("I'm " + TOMATO_TYPES[state.resultTomatoKey].article + " " + document.getElementById("resultTomatoName").textContent + "! Take the quiz to find yours.").toLowerCase())
+      });
+    }).catch(function () {
+      saveBtn.disabled = false;
+      label.textContent = originalLabel;
+      alert("Something went wrong preparing your image. Please try again.");
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // STICKER FLOW
+  // Step 1: camera trigger -> Step 2: reframe/crop -> Step 3: final composite
+  // ---------------------------------------------------------------
+  // Shows step 1 with the result tomato, and the camera button sitting where
+  // that tomato's face will go.
+  function showStickerCameraStep() {
+    var key = state.resultTomatoKey || "cherry";
+    var tomato = TOMATO_TYPES[key] || TOMATO_TYPES.cherry;
+    var btn = document.getElementById("cameraTriggerBtn");
+
+    state.stickerPhotoImage = null;
+    state.stickerPhotoCanvas = null;
+    document.getElementById("cameraFileInput").value = "";
+
+    renderTomatoGraphic(document.getElementById("stickerCameraGraphic"), key);
+    if (tomato.image && tomato.faces && tomato.faces.length) {
+      btn.style.left = (tomato.faces[0].x * 100) + "%";
+      btn.style.top = (tomato.faces[0].y * 100) + "%";
+    } else {
+      btn.style.left = "50%";
+      btn.style.top = "50%";
+    }
+    showView("view-sticker-camera");
+  }
+
+  function handleStickerClick() {
+    showStickerCameraStep();
+  }
+
+  // The iPhone saves selfies un-mirrored, which looks "flipped" compared to
+  // the viewfinder. Mirror the photo so the sticker matches what the person
+  // saw live. Also caps the size, since full-resolution photos are far more
+  // than the sticker needs.
+  var MIRROR_SELFIE = true;
+  var SELFIE_MAX_SIDE = 2000;
+
+  function prepareSelfie(img) {
+    var scale = Math.min(1, SELFIE_MAX_SIDE / Math.max(img.width, img.height));
+    var w = Math.round(img.width * scale);
+    var h = Math.round(img.height * scale);
+    var c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    var ctx = c.getContext("2d");
+    if (MIRROR_SELFIE) {
+      ctx.translate(w, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(img, 0, 0, w, h);
+    return c;
+  }
+
+  function handleCameraFileChange(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+      var img = new Image();
+      img.onload = function () {
+        var selfie = prepareSelfie(img);
+        state.stickerPhotoImage = selfie;
+        setupCropForNewImage(selfie);
+        showView("view-sticker-crop");
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  function setupCropForNewImage(img) {
+    var baseScale = Math.max(
+      (CROP_RX * 2) / img.width,
+      (CROP_RY * 2) / img.height
+    );
+    state.stickerBaseScale = baseScale;
+    state.stickerTransform = { offsetX: 0, offsetY: 0, scale: baseScale };
+
+    var slider = document.getElementById("zoomSlider");
+    slider.min = baseScale;
+    slider.max = baseScale * 3;
+    slider.step = ((baseScale * 3) - baseScale) / 200 || 0.001;
+    slider.value = baseScale;
+
+    drawCropCanvas();
+  }
+
+  function clampStickerTransform() {
+    var img = state.stickerPhotoImage;
+    var t = state.stickerTransform;
+    if (!img) return;
+
+    var dw = img.width * t.scale;
+    var dh = img.height * t.scale;
+    var maxOffsetX = Math.max(0, (dw / 2) - CROP_RX);
+    var maxOffsetY = Math.max(0, (dh / 2) - CROP_RY);
+
+    t.offsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, t.offsetX));
+    t.offsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, t.offsetY));
+  }
+
+  function drawCropCanvas() {
+    var canvas = document.getElementById("cropCanvas");
+    var ctx = canvas.getContext("2d");
+    var W = canvas.width, H = canvas.height;
+    var cx = W / 2, cy = H / 2;
+
+    ctx.clearRect(0, 0, W, H);
+
+    var img = state.stickerPhotoImage;
+    if (!img) return;
+
+    var t = state.stickerTransform;
+    var dw = img.width * t.scale;
+    var dh = img.height * t.scale;
+    var dx = cx - dw / 2 + t.offsetX;
+    var dy = cy - dh / 2 + t.offsetY;
+    ctx.drawImage(img, dx, dy, dw, dh);
+
+    // Dim everything outside the crop oval
+    ctx.save();
+    ctx.fillStyle = "rgba(96, 52, 10, 0.55)";
+    ctx.beginPath();
+    ctx.rect(0, 0, W, H);
+    ctx.moveTo(cx + CROP_RX, cy);
+    ctx.ellipse(cx, cy, CROP_RX, CROP_RY, 0, 0, Math.PI * 2, true);
+    ctx.fill("evenodd");
+    ctx.restore();
+
+    // Oval guide border
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, CROP_RX, CROP_RY, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = "#FFFDF8";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  function handleZoomSliderInput(e) {
+    state.stickerTransform.scale = parseFloat(e.target.value);
+    clampStickerTransform();
+    drawCropCanvas();
+  }
+
+  function handleRetakePhoto() {
+    showStickerCameraStep();
+  }
+
+  // Average color of the tomato art under the face area, so the face is tinted
+  // to match each tomato (red, gold, striped...). Returns null if the pixels
+  // can't be read; callers fall back to the tomato's configured color.
+  function sampleTomatoColor(tomatoImg, face) {
+    try {
+      var w = 240;
+      var h = Math.max(1, Math.round(w * tomatoImg.naturalHeight / tomatoImg.naturalWidth));
+      var c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      var ctx = c.getContext("2d");
+      ctx.drawImage(tomatoImg, 0, 0, w, h);
+
+      var cx = face.x * w, cy = face.y * h, r = (face.size * w * OVAL_ASPECT) / 2;
+      var x0 = Math.max(0, Math.floor(cx - r)), x1 = Math.min(w, Math.ceil(cx + r));
+      var y0 = Math.max(0, Math.floor(cy - r)), y1 = Math.min(h, Math.ceil(cy + r));
+      var data = ctx.getImageData(x0, y0, x1 - x0, y1 - y0).data;
+
+      var rSum = 0, gSum = 0, bSum = 0, n = 0;
+      for (var y = y0; y < y1; y++) {
+        for (var x = x0; x < x1; x++) {
+          var dx = x - cx, dy = y - cy;
+          if (dx * dx + dy * dy > r * r) continue;
+          var i = ((y - y0) * (x1 - x0) + (x - x0)) * 4;
+          if (data[i + 3] < 200) continue;
+          rSum += data[i]; gSum += data[i + 1]; bSum += data[i + 2]; n++;
+        }
+      }
+      if (!n) return null;
+      return "rgb(" + Math.round(rSum / n) + "," + Math.round(gSum / n) + "," + Math.round(bSum / n) + ")";
+    } catch (err) {
+      return null;
+    }
+  }
+
+  // Crops the user's photo to the oval, tints it toward the tomato's color,
+  // and feathers the edge so it blends into the tomato instead of looking
+  // like a pasted-on cutout. Rendered at 2x the crop-oval size for sharpness.
+  function buildBlendedFace(img, tintColor) {
+    var k = 2;
+    var w = CROP_RX * 2 * k;
+    var h = CROP_RY * 2 * k;
+    var faceCanvas = document.createElement("canvas");
+    faceCanvas.width = w;
+    faceCanvas.height = h;
+    var ctx = faceCanvas.getContext("2d");
+
+    // 1. Draw the photo, clipped to the oval
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+    ctx.clip();
+
+    var t = state.stickerTransform;
+    var dw = img.width * t.scale * k;
+    var dh = img.height * t.scale * k;
+    var dx = w / 2 - dw / 2 + t.offsetX * k;
+    var dy = h / 2 - dh / 2 + t.offsetY * k;
+    ctx.drawImage(img, dx, dy, dw, dh);
+
+    // 2. Tint toward the tomato's color so skin tones pick up its hue
+    ctx.globalCompositeOperation = "multiply";
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = tintColor;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.globalAlpha = 0.25;
+    ctx.globalCompositeOperation = "overlay";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.restore();
+
+    // 3. Feather the edge with an oval alpha falloff (a radial gradient,
+    // squashed horizontally to match the oval)
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.save();
+    ctx.translate(w / 2, h / 2);
+    ctx.scale(w / h, 1);
+    var feather = ctx.createRadialGradient(0, 0, h * 0.4, 0, 0, h / 2);
+    feather.addColorStop(0, "rgba(0,0,0,1)");
+    feather.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = feather;
+    ctx.fillRect(-h / 2, -h / 2, h, h);
+    ctx.restore();
+    ctx.globalCompositeOperation = "source-over";
+
+    return faceCanvas;
+  }
+
+  function handleConfirmCrop() {
+    if (!state.stickerPhotoImage) return;
+    renderStickerFinal();
+    showRandomJoke();
+    showView("view-sticker-final");
+  }
+
+  var STICKER_RENDER_WIDTH = 900;
+  var stickerFinalRenderPromise = null;
+
+  function renderStickerFinal() {
+    var canvas = document.getElementById("stickerFinalCanvas");
+    var key = state.resultTomatoKey || "cherry";
+    var tomato = TOMATO_TYPES[key] || TOMATO_TYPES.cherry;
+    var faces = (tomato.image && tomato.faces && tomato.faces.length) ? tomato.faces : DEFAULT_FACES;
+
+    // Clear any previous sticker so it doesn't flash while the new one renders
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+    stickerFinalRenderPromise = loadTomatoImage(key, STICKER_RENDER_WIDTH).then(function (tomatoImg) {
+      // Size the sticker to the art's own proportions (it isn't square)
+      var W = STICKER_RENDER_WIDTH;
+      var H = Math.round(W * (tomatoImg.naturalHeight || tomatoImg.naturalWidth) / tomatoImg.naturalWidth);
+      canvas.width = W;
+      canvas.height = H;
+
+      var ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(tomatoImg, 0, 0, W, H);
+
+      if (state.stickerPhotoImage) {
+        faces.forEach(function (face) {
+          // Each tomato's face is tinted from the art right under it
+          var tint = sampleTomatoColor(tomatoImg, face) || tomato.color;
+          var faceCanvas = buildBlendedFace(state.stickerPhotoImage, tint);
+          state.stickerPhotoCanvas = faceCanvas;
+
+          var fh = face.size * W;
+          var fw = fh * OVAL_ASPECT;
+          ctx.save();
+          ctx.translate(face.x * W, face.y * H);
+          if (face.rotation) ctx.rotate(face.rotation * Math.PI / 180);
+          ctx.drawImage(faceCanvas, -fw / 2, -fh / 2, fw, fh);
+          ctx.restore();
+        });
+      }
+
+    }).catch(function (err) {
+      console.error("Failed to render sticker composite:", err);
+    });
+
+    return stickerFinalRenderPromise;
+  }
+
+  function handleStickerShare() {
+    var canvas = document.getElementById("stickerFinalCanvas");
+    Promise.resolve(stickerFinalRenderPromise).then(function () {
+      var tomato = TOMATO_TYPES[state.resultTomatoKey] || TOMATO_TYPES.cherry;
+      showSavePreview(canvas, {
+        filename: "my-tomato-sticker.png",
+        title: "My Tomato Sticker",
+        text: withQuizLink(("I'm " + tomato.article + " " + tomato.name + "!").toLowerCase())
+      });
+    });
+  }
+
+  // Pointer-driven drag (pan) and pinch (zoom) on the crop canvas
+  function setupCropCanvasInteractions() {
+    var canvas = document.getElementById("cropCanvas");
+    var activePointers = {};
+    var dragStart = null;
+    var pinchStart = null;
+
+    function pointerIds() {
+      return Object.keys(activePointers);
+    }
+
+    canvas.addEventListener("pointerdown", function (e) {
+      canvas.setPointerCapture(e.pointerId);
+      activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = pointerIds();
+
+      if (ids.length === 1) {
+        dragStart = {
+          x: e.clientX,
+          y: e.clientY,
+          offsetX: state.stickerTransform.offsetX,
+          offsetY: state.stickerTransform.offsetY
+        };
+        pinchStart = null;
+      } else if (ids.length === 2) {
+        dragStart = null;
+        var pts = ids.map(function (id) { return activePointers[id]; });
+        var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        pinchStart = { dist: dist, scale: state.stickerTransform.scale };
+      }
+    });
+
+    canvas.addEventListener("pointermove", function (e) {
+      if (!activePointers[e.pointerId]) return;
+      activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = pointerIds();
+      var rect = canvas.getBoundingClientRect();
+      var ratio = canvas.width / rect.width;
+
+      if (ids.length === 1 && dragStart) {
+        var dx = (e.clientX - dragStart.x) * ratio;
+        var dy = (e.clientY - dragStart.y) * ratio;
+        state.stickerTransform.offsetX = dragStart.offsetX + dx;
+        state.stickerTransform.offsetY = dragStart.offsetY + dy;
+        clampStickerTransform();
+        drawCropCanvas();
+      } else if (ids.length === 2 && pinchStart) {
+        var pts = ids.map(function (id) { return activePointers[id]; });
+        var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        var newScale = pinchStart.scale * (dist / pinchStart.dist);
+        newScale = Math.max(state.stickerBaseScale, Math.min(state.stickerBaseScale * 3, newScale));
+        state.stickerTransform.scale = newScale;
+        document.getElementById("zoomSlider").value = newScale;
+        clampStickerTransform();
+        drawCropCanvas();
+      }
+    });
+
+    function endPointer(e) {
+      delete activePointers[e.pointerId];
+      var ids = pointerIds();
+      if (ids.length === 1) {
+        var id = ids[0];
+        dragStart = {
+          x: activePointers[id].x,
+          y: activePointers[id].y,
+          offsetX: state.stickerTransform.offsetX,
+          offsetY: state.stickerTransform.offsetY
+        };
+        pinchStart = null;
+      } else if (ids.length === 0) {
+        dragStart = null;
+        pinchStart = null;
+      }
+    }
+
+    canvas.addEventListener("pointerup", endPointer);
+    canvas.addEventListener("pointercancel", endPointer);
+  }
+
+  function calculateScores() {
+    var scores = { cherry: 0, beefsteak: 0, sungold: 0, heirloom: 0 };
+    state.answers.forEach(function (answerIndex, questionIndex) {
+      if (answerIndex === null || answerIndex === undefined) return;
+      var chosenAnswer = QUESTIONS[questionIndex].answers[answerIndex];
+      scores[chosenAnswer.tomato] += 1;
+    });
+    return scores;
+  }
+
+  function calculateResult() {
+    var scores = calculateScores();
+    var maxScore = Math.max(scores.cherry, scores.beefsteak, scores.sungold, scores.heirloom);
+    var tied = Object.keys(scores).filter(function (key) {
+      return scores[key] === maxScore;
+    });
+    if (tied.length === 1) {
+      return tied[0];
+    }
+    return tied[Math.floor(Math.random() * tied.length)];
+  }
+
+  function resetQuiz() {
+    state.currentQuestionIndex = 0;
+    state.answers = [];
+    updateProgressBar();
+    showView("view-landing");
+  }
+
+  // ---------------------------------------------------------------
+  // INIT
+  // ---------------------------------------------------------------
+  function init() {
+    var landingGraphic = document.getElementById("landingTomatoGraphic");
+    landingGraphic.classList.add("is-art");
+    landingGraphic.innerHTML = '<img src="' + HOME_IMAGE + '" alt="A smiling cartoon tomato" />';
+
+    document.getElementById("startQuizBtn").addEventListener("click", function () {
+      resetQuizState();
+      renderQuestion();
+      showView("view-quiz");
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", handleNext);
+    document.getElementById("backBtn").addEventListener("click", handleBack);
+    document.getElementById("restartBtn").addEventListener("click", resetQuiz);
+    document.getElementById("saveBtn").addEventListener("click", handleSave);
+    document.getElementById("stickerBtn").addEventListener("click", handleStickerClick);
+    document.getElementById("saveFallbackClose").addEventListener("click", hideSavePreview);
+    document.getElementById("savePreviewShareBtn").addEventListener("click", handlePreviewShare);
+
+    document.getElementById("cameraTriggerBtn").addEventListener("click", function () {
+      document.getElementById("cameraFileInput").click();
+    });
+    document.getElementById("cameraFileInput").addEventListener("change", handleCameraFileChange);
+    document.getElementById("retakeBtn").addEventListener("click", handleRetakePhoto);
+    document.getElementById("confirmCropBtn").addEventListener("click", handleConfirmCrop);
+    document.getElementById("zoomSlider").addEventListener("input", handleZoomSliderInput);
+    document.getElementById("stickerShareBtn").addEventListener("click", handleStickerShare);
+    document.getElementById("stickerBackBtn").addEventListener("click", function () {
+      showView("view-result");
+    });
+    setupCropCanvasInteractions();
+  }
+
+  function resetQuizState() {
+    state.currentQuestionIndex = 0;
+    state.answers = [];
+    state.answerOrder = newAnswerOrders();
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+
+</body>
+</html>
